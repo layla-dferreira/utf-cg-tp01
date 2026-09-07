@@ -42,18 +42,6 @@ export const createProgramFromFiles = async (gl, vertexPath, fragmentPath) => {
   return createProgram(gl, vertexShader, fragmentShader);
 };
 
-export function setupWebGL(selector) {
-  const canvas = document.querySelector(selector);
-  const gl = canvas.getContext('webgl2');
-
-  if (!gl) {
-    console.error('WebGL2 não está disponível');
-    throw new Error('WebGL2 não suportado');
-  }
-
-  return gl
-}
-
 export function createTexture(gl, image) {
   const texture = gl.createTexture();
 
