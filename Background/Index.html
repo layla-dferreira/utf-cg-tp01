@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Defense</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+        }
+
+        .canvas-tower-defense {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas class="canvas-tower-defense" width="500" height="500"></canvas>
+
+    <script id="vertex-shader" type="shader/vertex">
+        #version 300 es
+        in vec2 position;
+        in vec2 texturePosition;
+        out vec2 textureCoordinate;
+
+        void main() {
+            gl_Position = vec4(position, 0.0, 1.0);
+            textureCoordinate = texturePosition;
+        }
+    </script>
+
+    <script type="shader/fragment">
+        #version 300 es
+        precision highp float;
+        uniform sampler2D backgroundTexture;
+        in vec2 textureCoordinate;
+        out vec4 outColor;
+
+        void main() {
+            outColor = texture(backgroundTexture, textureCoordinate);
+        }
+    </script>
+    <script type="module">
+        import { setupWebGL, initialize, loadBackground } from './main.js';
+
+        const gl = setupWebGL();
+        initialize(gl);
+        loadBackground(gl, '../Img/background.png');
+    </script>
+</body>
