@@ -7,6 +7,7 @@ export const createShader = (gl, name, type, source) => {
     return shader;
   }
 
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   const infoLog = gl.getShaderInfoLog(shader);
   console.error(`Erro ao compilar o shader ${name}:`, infoLog);
   gl.deleteShader(shader);
