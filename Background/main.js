@@ -25,9 +25,12 @@ export function setupWebGL() {
   return gl;
 }
 
-export function initialize(gl) {
-  const vertexShaderCode = document.querySelector('[type="shader/vertex"]').textContent;
-  const fragmentShaderCode = document.querySelector('[type="shader/fragment"]').textContent;
+export async function initialize(gl) {
+  const bgVertexResponse = await fetch('./vertexShaderBackground.glsl');
+  const bgFragmentResponse = await fetch('./fragmentShaderBackground.glsl');
+
+  const vertexShaderCode = await bgVertexResponse.text();
+  const fragmentShaderCode = await bgFragmentResponse.text();
 
   const program = createProgram(gl, createShader(gl, 'vs', gl.VERTEX_SHADER, vertexShaderCode),
     createShader(gl, 'fs', gl.FRAGMENT_SHADER, fragmentShaderCode)
@@ -64,8 +67,12 @@ export function initialize(gl) {
   gl.programInfo = { vao, textureLocation };
   gl.bindVertexArray(null);
 
-  const enemyVertexShaderCode = document.querySelector('#enemy-vertex-shader').textContent;
-  const enemyFragmentShaderCode = document.querySelector('#enemy-fragment-shader').textContent;
+  const enemyVertexResponse = await fetch('../Enemies/vertexShaderEnemy.glsl');
+  const enemyFragmentResponse = await fetch('../Enemies/fragmentShaderEnemy.glsl');
+
+  const enemyVertexShaderCode = await enemyVertexResponse.text();
+  const enemyFragmentShaderCode = await enemyFragmentResponse.text();
+
   const enemyProgram = createProgram(
     gl,
     createShader(gl, 'enemy vertex shader', gl.VERTEX_SHADER, enemyVertexShaderCode),
