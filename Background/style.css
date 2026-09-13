@@ -1,11 +1,7 @@
 body {
     width: 100%;
-    min-height: 100%;
-    margin: 0;
-}
-
-body {
     min-height: 100vh;
+    margin: 0;
     display: grid;
     place-items: center;
 }
