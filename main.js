@@ -1,6 +1,7 @@
 import { createTexture } from './utils.js';
 import { setupBackground, drawBackground } from './Background/background.js';
 import { setupEnemies, drawEnemies } from './Enemies/enemies.js';
+import { setupPlayer, drawPlayer } from './Player/player.js';
 
 /* function ortho(left, right, bottom, top, near, far) {
   const tx = -(right + left) / (right - left)
@@ -33,14 +34,16 @@ function loadImage(path) {
 }
 
 async function start() {
-    const [backgroundTexture, enemyTexture] = await Promise.all([
+    const [backgroundTexture, enemyTexture, playerTexture] = await Promise.all([
         loadImage('./Img/background.png'),
-        loadImage('./Img/slimeGreen.png')
+        loadImage('./Img/slimeGreen.png'),
+        loadImage('./Img/player.png')
     ]);
 
     const background = await setupBackground(gl);
     const enemies = await setupEnemies(gl);
-
+    const player = await setupPlayer(gl);
+    
     function render() {
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0, 0, 0, 1);
@@ -48,6 +51,7 @@ async function start() {
 
         drawBackground(gl, background, backgroundTexture);
         drawEnemies(gl, enemies, enemyTexture);
+        drawPlayer(gl, player, playerTexture);
 
         requestAnimationFrame(render);
     }
