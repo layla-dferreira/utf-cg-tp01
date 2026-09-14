@@ -47,20 +47,20 @@ async function start() {
     const player = await setupPlayer(gl);
     const tower = await setupTower(gl);
 
-    function render() {
+    function render(currentTime) {
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         drawBackground(gl, background, backgroundTexture);
-        drawEnemies(gl, enemies, enemyTexture);
+        drawEnemies(gl, enemies, enemyTexture, currentTime);
         drawPlayer(gl, player, playerTexture);
         drawTower(gl, tower, towerTexture);
 
         requestAnimationFrame(render);
     }
 
-    render();
+    requestAnimationFrame(render);
 }
 
 try {

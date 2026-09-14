@@ -30,11 +30,11 @@ export async function setupEnemies(gl) {
 
     const vertices = new Float32Array([
         -1, -1, 0, 0,
-        1, -1, 0.125, 0,
-        -1, 1, 0, 0.333,
-        -1, 1, 0, 0.333,
-        1, -1, 0.125, 0,
-        1, 1, 0.125, 0.333
+        1, -1, 1, 0,
+        -1, 1, 0, 1,
+        -1, 1, 0, 1,
+        1, -1, 1, 0,
+        1, 1, 1, 1
     ]);
 
     gl.bindVertexArray(vao);
@@ -51,11 +51,22 @@ export async function setupEnemies(gl) {
         vao,
         textureLocation: gl.getUniformLocation(program, 'enemyTexture'),
         positionLocation: gl.getUniformLocation(program, 'enemyPosition'),
-        sizeLocation: gl.getUniformLocation(program, 'enemySize')
+        sizeLocation: gl.getUniformLocation(program, 'enemySize'),
+        frameDislocationLocation: gl.getUniformLocation(program, 'enemyFrameDislocation'),
+        frameScaleLocation: gl.getUniformLocation(program, 'enemyFrameScale')
     };
 }
 
-export function drawEnemies(gl, enemies, texture) {
+const frames = 8;
+const columns = 8;
+const rows = 3;
+const animationRow = 1;
+const frameDuration = 100;
+
+let time = 0.0;
+let currentFrame = 0;
+
+export function drawEnemies(gl, enemies, texture, currentTime) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.useProgram(enemies.program);
@@ -64,6 +75,17 @@ export function drawEnemies(gl, enemies, texture) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(enemies.textureLocation, 0);
     gl.uniform2f(enemies.sizeLocation, 0.20, 0.20);
+
+    if ((currentTime - time) > frameDuration) {
+        currentFrame = (currentFrame + 1) % frames;
+        time = currentTime;
+    }
+
+    const frameDurationX = (currentFrame % columns) / columns;
+    const frameDurationY = animationRow / rows;
+
+    gl.uniform2f(enemies.frameScaleLocation, 1 / columns, 1 / rows);
+    gl.uniform2f(enemies.frameDislocationLocation, frameDurationX, frameDurationY);
 
     enemyPositions.forEach((enemy) => {
         gl.uniform2f(enemies.positionLocation, enemy.x, enemy.y);
