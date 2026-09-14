@@ -1,9 +1,9 @@
 import { createProgram, createShader } from '../utils.js';
 
 const enemyPositions = [
-    { x: 0.0, y: 0.0 },
-    { x: 0.6, y: -0.5 },
-    { x: -0.7, y: 0.2 }
+    { slime: { x: 0.0, y: 0.0, currentFrame: 0, time: 0 } },
+    { skeleton: { x: 0.6, y: -0.5, currentFrame: 0, time: 0 } },
+    { pig: { x: -0.7, y: 0.2, currentFrame: 0, time: 0 } }
 ];
 
 export async function setupEnemies(gl) {
@@ -57,41 +57,41 @@ export async function setupEnemies(gl) {
     };
 }
 
-const frames = 8;
-const columns = 8;
-const rows = 3;
-const animationRow = 1;
-const frameDuration = 100;
+const configFrames = {
+    slime: { frames: 8, columns: 8, rows: 3, animationRow: 1, frameDuration: 100 },
+    skeleton: { frames: 6, columns: 6, rows: 10, animationRow: 5, frameDuration: 100 },
+    pig: { frames: 12, columns: 12, rows: 1, animationRow: 0, frameDuration: 100 }
+};
 
-let time = 0.0;
-let currentFrame = 0;
-
-export function drawEnemies(gl, enemies, texture, currentTime) {
+export function drawEnemies(gl, enemies, textures, currentTime) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.useProgram(enemies.program);
     gl.bindVertexArray(enemies.vao);
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.uniform1i(enemies.textureLocation, 0);
     gl.uniform2f(enemies.sizeLocation, 0.20, 0.20);
 
-    if ((currentTime - time) > frameDuration) {
-        currentFrame = (currentFrame + 1) % frames;
-        time = currentTime;
-    }
+    enemyPositions.forEach((enemyEntry) => {
+        const [type, enemy] = Object.entries(enemyEntry)[0];
+        const configType = configFrames[type];
 
-    const frameDurationX = (currentFrame % columns) / columns;
-    const frameDurationY = animationRow / rows;
+        if ((currentTime - enemy.time) > configType.frameDuration) {
+            enemy.currentFrame = (enemy.currentFrame + 1) % configType.frames;
+            enemy.time = currentTime;
+        }
 
-    gl.uniform2f(enemies.frameScaleLocation, 1 / columns, 1 / rows);
-    gl.uniform2f(enemies.frameDislocationLocation, frameDurationX, frameDurationY);
+        const frameDurationX = (enemy.currentFrame % configType.columns) / configType.columns;
+        const frameDurationY = configType.animationRow / configType.rows;
 
-    enemyPositions.forEach((enemy) => {
+        gl.uniform2f(enemies.frameScaleLocation, 1 / configType.columns, 1 / configType.rows);
+        gl.uniform2f(enemies.frameDislocationLocation, frameDurationX, frameDurationY);
+
+        gl.bindTexture(gl.TEXTURE_2D, textures[type]);
+        gl.uniform1i(enemies.textureLocation, 0);
+
         gl.uniform2f(enemies.positionLocation, enemy.x, enemy.y);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     });
-
     gl.bindVertexArray(null);
     gl.disable(gl.BLEND);
 }
