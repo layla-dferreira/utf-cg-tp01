@@ -1,6 +1,6 @@
 import { createProgram, createShader } from '../utils.js';
 
-const playerPosition = { x: 0.4, y: 0.1, currentFrame: 0, time: 0 };
+const playerPosition = { x: 0.4, y: 0.1, currentFrame: 0, time: 0, speed: 0.01, direction: 1 };
 
 export async function setupPlayer(gl) {
     const [vertexShaderResponse, fragmentShaderResponse] = await Promise.all([
@@ -57,6 +57,47 @@ const configFrames = {
     player: { frames: 12, columns: 12, rows: 1, animationRow: 0, frameDuration: 100 }
 };
 
+const indicatesKey = {
+    w: false,
+    a: false,
+    s: false,
+    d: false
+};
+
+window.addEventListener('keydown', (event) => {
+    const key = event.key.toLowerCase();
+
+    if (Object.hasOwn(indicatesKey, key)) {
+        event.preventDefault();
+        indicatesKey[key] = true;
+    }
+});
+
+window.addEventListener('keyup', (event) => {
+    const key = event.key.toLowerCase();
+
+    if (Object.hasOwn(indicatesKey, key)) {
+        indicatesKey[key] = false;
+    }
+});
+
+export function updatePlayerPosition() {
+    if (indicatesKey.w) {
+        playerPosition.y += playerPosition.speed;
+    }
+    if (indicatesKey.s) {
+        playerPosition.y -= playerPosition.speed;
+    }
+    if (indicatesKey.a) {
+        playerPosition.direction = -1;
+        playerPosition.x -= playerPosition.speed;
+    }
+    if (indicatesKey.d) {
+        playerPosition.direction = 1;
+        playerPosition.x += playerPosition.speed;
+    }
+}
+
 export function drawPlayer(gl, player, texture, currentTime) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -65,7 +106,7 @@ export function drawPlayer(gl, player, texture, currentTime) {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(player.textureLocation, 0);
-    gl.uniform2f(player.sizeLocation, 0.14, 0.14);
+    gl.uniform2f(player.sizeLocation, (0.14 * playerPosition.direction), 0.14);
     gl.uniform2f(player.positionLocation, playerPosition.x, playerPosition.y);
 
     if ((currentTime - playerPosition.time) > configFrames.player.frameDuration) {

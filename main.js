@@ -1,7 +1,7 @@
 import { createTexture } from './utils.js';
 import { setupBackground, drawBackground } from './Background/background.js';
 import { setupEnemies, drawEnemies } from './Enemies/enemies.js';
-import { setupPlayer, drawPlayer } from './Player/player.js';
+import { setupPlayer, drawPlayer, updatePlayerPosition } from './Player/player.js';
 import { setupTower, drawTower } from './Tower/tower.js';
 
 /* function ortho(left, right, bottom, top, near, far) {
@@ -56,6 +56,8 @@ async function start() {
     }
     
     function render(currentTime) {
+        updatePlayerPosition();
+        
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
