@@ -63,13 +63,18 @@ const configFrames = {
     pig: { frames: 12, columns: 12, rows: 1, animationRow: 0, frameDuration: 100 }
 };
 
+const enemySize = {
+    slime: { width: 0.20, height: 0.20 },
+    skeleton: { width: 0.16, height: 0.16 },
+    pig: { width: 0.10, height: 0.10 }
+};
+
 export function drawEnemies(gl, enemies, textures, currentTime) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.useProgram(enemies.program);
     gl.bindVertexArray(enemies.vao);
     gl.activeTexture(gl.TEXTURE0);
-    gl.uniform2f(enemies.sizeLocation, 0.20, 0.20);
 
     enemyPositions.forEach((enemyEntry) => {
         const [type, enemy] = Object.entries(enemyEntry)[0];
@@ -85,6 +90,7 @@ export function drawEnemies(gl, enemies, textures, currentTime) {
 
         gl.uniform2f(enemies.frameScaleLocation, 1 / configType.columns, 1 / configType.rows);
         gl.uniform2f(enemies.frameDislocationLocation, frameDurationX, frameDurationY);
+        gl.uniform2f(enemies.sizeLocation, enemySize[type].width, enemySize[type].height);
 
         gl.bindTexture(gl.TEXTURE_2D, textures[type]);
         gl.uniform1i(enemies.textureLocation, 0);
