@@ -62,7 +62,7 @@ async function start() {
 
         drawBackground(gl, background, backgroundTexture);
         drawEnemies(gl, enemies, enemyTextures, currentTime);
-        drawPlayer(gl, player, playerTexture);
+        drawPlayer(gl, player, playerTexture, currentTime);
         drawTower(gl, tower, towerTexture);
 
         requestAnimationFrame(render);

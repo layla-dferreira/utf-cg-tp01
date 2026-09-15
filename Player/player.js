@@ -1,6 +1,6 @@
 import { createProgram, createShader } from '../utils.js';
 
-const playerPosition = { x: 0.4, y: 0.1 };
+const playerPosition = { x: 0.4, y: 0.1, currentFrame: 0, time: 0 };
 
 export async function setupPlayer(gl) {
     const [vertexShaderResponse, fragmentShaderResponse] = await Promise.all([
@@ -25,11 +25,11 @@ export async function setupPlayer(gl) {
     const texturePositionLocation = gl.getAttribLocation(program, 'texturePosition');
 
     const vertices = new Float32Array([
-        -1, -1, 0.5, 0.944444,
-        1, -1, 1, 0.944444,
-        -1, 1, 0.5, 1,
-        -1, 1, 0.5, 1,
-        1, -1, 1, 0.944444,
+        -1, -1, 0, 0,
+        1, -1, 1, 0,
+        -1, 1, 0, 1,
+        -1, 1, 0, 1,
+        1, -1, 1, 0,
         1, 1, 1, 1
     ]);
 
@@ -47,11 +47,17 @@ export async function setupPlayer(gl) {
         vao,
         textureLocation: gl.getUniformLocation(program, 'playerTexture'),
         positionLocation: gl.getUniformLocation(program, 'playerPosition'),
-        sizeLocation: gl.getUniformLocation(program, 'playerSize')
+        sizeLocation: gl.getUniformLocation(program, 'playerSize'),
+        frameDislocationLocation: gl.getUniformLocation(program, 'playerFrameDislocation'),
+        frameScaleLocation: gl.getUniformLocation(program, 'playerFrameScale')
     };
 }
 
-export function drawPlayer(gl, player, texture) {
+const configFrames = {
+    player: { frames: 12, columns: 12, rows: 1, animationRow: 0, frameDuration: 100 }
+};
+
+export function drawPlayer(gl, player, texture, currentTime) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.useProgram(player.program);
@@ -59,9 +65,21 @@ export function drawPlayer(gl, player, texture) {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(player.textureLocation, 0);
-    gl.uniform2f(player.sizeLocation, 0.26, 0.20);
+    gl.uniform2f(player.sizeLocation, 0.14, 0.14);
     gl.uniform2f(player.positionLocation, playerPosition.x, playerPosition.y);
+
+    if ((currentTime - playerPosition.time) > configFrames.player.frameDuration) {
+        playerPosition.currentFrame = (playerPosition.currentFrame + 1) % configFrames.player.frames;
+        playerPosition.time = currentTime;
+    }
+
+    const frameDurationX = (playerPosition.currentFrame % configFrames.player.columns) / configFrames.player.columns;
+    const frameDurationY = configFrames.player.animationRow / configFrames.player.rows;
+
+    gl.uniform2f(player.frameScaleLocation, 1 / configFrames.player.columns, 1 / configFrames.player.rows);
+    gl.uniform2f(player.frameDislocationLocation, frameDurationX, frameDurationY);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+
     gl.bindVertexArray(null);
     gl.disable(gl.BLEND);
 }
