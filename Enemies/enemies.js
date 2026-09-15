@@ -1,6 +1,6 @@
 import { createProgram, createShader } from '../utils.js';
 
-const enemyPositions = [
+export const enemyPositions = [
     { slime: { x: 0.0, y: 0.0, currentFrame: 0, time: 0 } },
     { skeleton: { x: 0.6, y: -0.5, currentFrame: 0, time: 0 } },
     { pig: { x: -0.7, y: 0.2, currentFrame: 0, time: 0 } }
@@ -67,6 +67,12 @@ const enemySize = {
     slime: { width: 0.20, height: 0.20 },
     skeleton: { width: 0.16, height: 0.16 },
     pig: { width: 0.10, height: 0.10 }
+};
+
+export const enemyCollision = {
+    slime: { width: 0.20, height: 0.20, offsetY: 0.02 },
+    skeleton: { width: 0.16, height: 0.24, offsetY: 0.05 },
+    pig: { width: 0.14, height: 0.24, offsetY: 0.02 }
 };
 
 export function drawEnemies(gl, enemies, textures, currentTime) {

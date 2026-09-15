@@ -1,6 +1,6 @@
 import { createProgram, createShader } from '../utils.js';
 
-const towerPosition = { x: -0.4, y: 0.3, currentFrame: 0, time: 0 };
+export const towerPosition = { x: -0.4, y: 0.3, currentFrame: 0, time: 0 };
 
 export async function setupTower(gl) {
     const [vertexShaderResponse, fragmentShaderResponse] = await Promise.all([
@@ -56,6 +56,15 @@ export async function setupTower(gl) {
 const configFrames = {
     tower: { frames: 6, columns: 6, rows: 1, animationRow: 0, frameDuration: 100 }
 };
+
+const towerSize = {
+    tower: { width: 0.23, height: 0.36 }
+};
+
+export const towerCollision = {
+    tower: { width: 0.38, height: 0.50, offsetY: -0.12 }
+};
+
 export function drawTower(gl, tower, texture, currentTime) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -64,7 +73,7 @@ export function drawTower(gl, tower, texture, currentTime) {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(tower.textureLocation, 0);
-    gl.uniform2f(tower.sizeLocation, 0.23, 0.36);
+    gl.uniform2f(tower.sizeLocation, towerSize.tower.width, towerSize.tower.height);
     gl.uniform2f(tower.positionLocation, towerPosition.x, towerPosition.y);
 
     if ((currentTime - towerPosition.time) > configFrames.tower.frameDuration) {

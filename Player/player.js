@@ -1,4 +1,6 @@
 import { createProgram, createShader } from '../utils.js';
+import { enemyPositions, enemyCollision } from '../Enemies/enemies.js';
+import { towerPosition, towerCollision } from '../Tower/tower.js';
 
 const playerPosition = { x: 0.4, y: 0.1, currentFrame: 0, time: 0, speed: 0.01, direction: 1 };
 
@@ -82,20 +84,81 @@ window.addEventListener('keyup', (event) => {
 });
 
 export function updatePlayerPosition() {
+    let nextX = playerPosition.x;
+    let nextY = playerPosition.y;
+
     if (indicatesKey.w) {
-        playerPosition.y += playerPosition.speed;
+        nextY += playerPosition.speed;
     }
     if (indicatesKey.s) {
-        playerPosition.y -= playerPosition.speed;
+        nextY -= playerPosition.speed;
     }
     if (indicatesKey.a) {
         playerPosition.direction = -1;
-        playerPosition.x -= playerPosition.speed;
+        nextX -= playerPosition.speed;
     }
     if (indicatesKey.d) {
         playerPosition.direction = 1;
-        playerPosition.x += playerPosition.speed;
+        nextX += playerPosition.speed;
     }
+
+    const playerFuturePosition = {
+        x: nextX,
+        y: nextY,
+        width: playerSize.player.width,
+        height: playerSize.player.height
+    };
+
+    let hasCollision = false;
+
+
+    for (const enemy of enemyPositions) {
+        const enemyType = Object.keys(enemy)[0];
+        const enemyPosition = enemy[enemyType];
+        const enemiesCollision = enemyCollision[enemyType];
+
+        const enemyCollisionPosition = {
+            x: enemyPosition.x,
+            y: enemyPosition.y + enemiesCollision.offsetY
+        };
+
+        if (collisionDetection(enemyCollisionPosition, enemiesCollision, playerFuturePosition)) {
+            hasCollision = true;
+            break;
+        }
+    }
+
+    const towerCollisionPosition = {
+        x: towerPosition.x,
+        y: towerPosition.y + towerCollision.tower.offsetY
+    };
+
+    if (collisionDetection(towerCollisionPosition, towerCollision.tower, playerFuturePosition)) {
+        hasCollision = true;
+    }
+
+    if (!hasCollision) {
+        playerPosition.x = nextX;
+        playerPosition.y = nextY;
+    }
+}
+
+const playerSize = {
+    player: { width: 0.14, height: 0.14 }
+};
+
+function collisionDetection(enemyPositions, enemyCollision, playerPosition) {
+    const playerLeft = playerPosition.x - playerPosition.width / 2;
+    const playerRight = playerPosition.x + playerPosition.width / 2;
+    const playerTop = playerPosition.y + playerPosition.height / 2;
+    const playerBottom = playerPosition.y - playerPosition.height / 2;
+
+    const enemyLeft = enemyPositions.x - enemyCollision.width / 2;
+    const enemyRight = enemyPositions.x + enemyCollision.width / 2;
+    const enemyTop = enemyPositions.y + enemyCollision.height / 2;
+    const enemyBottom = enemyPositions.y - enemyCollision.height / 2;
+
+    return playerRight > enemyLeft && playerLeft < enemyRight && playerTop > enemyBottom && playerBottom < enemyTop;
 }
 
 export function drawPlayer(gl, player, texture, currentTime) {
@@ -106,7 +169,7 @@ export function drawPlayer(gl, player, texture, currentTime) {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(player.textureLocation, 0);
-    gl.uniform2f(player.sizeLocation, (0.14 * playerPosition.direction), 0.14);
+    gl.uniform2f(player.sizeLocation, (playerSize.player.width * playerPosition.direction), playerSize.player.height);
     gl.uniform2f(player.positionLocation, playerPosition.x, playerPosition.y);
 
     if ((currentTime - playerPosition.time) > configFrames.player.frameDuration) {
