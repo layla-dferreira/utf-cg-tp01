@@ -2,7 +2,7 @@ import { createProgram, createShader } from '../utils.js';
 import { enemyPositions, enemyCollision } from '../Enemies/enemies.js';
 import { towerPosition, towerCollision } from '../Tower/tower.js';
 
-const playerPosition = { x: 0.4, y: 0.1, currentFrame: 0, time: 0, speed: 0.01, direction: 1 };
+const playerInformations = { x: 0.4, y: 0.1, currentFrame: 0, time: 0, speed: 0.01, direction: 1, state: 'playerWalking' };
 
 export async function setupPlayer(gl) {
     const [vertexShaderResponse, fragmentShaderResponse] = await Promise.all([
@@ -56,7 +56,9 @@ export async function setupPlayer(gl) {
 }
 
 const configFrames = {
-    player: { frames: 12, columns: 12, rows: 1, animationRow: 0, frameDuration: 100 }
+    playerIdle: { frames: 8, columns: 8, rows: 1, animationRow: 0, frameDuration: 100 },
+    playerWalking: { frames: 6, columns: 6, rows: 1, animationRow: 0, frameDuration: 100 },
+    playerAttack: { frames: 4, columns: 4, rows: 1, animationRow: 0, frameDuration: 100 }
 };
 
 const indicatesKey = {
@@ -66,8 +68,20 @@ const indicatesKey = {
     d: false
 };
 
+function attackPlayer() {
+    if (playerInformations.state !== 'attacking') {
+        playerInformations.state = 'attacking';
+        playerInformations.currentFrame = 0;
+    }
+}
+
 window.addEventListener('keydown', (event) => {
     const key = event.key.toLowerCase();
+
+    if (event.code === 'Space') {
+        attackPlayer();
+        return;
+    }
 
     if (Object.hasOwn(indicatesKey, key)) {
         event.preventDefault();
@@ -83,34 +97,39 @@ window.addEventListener('keyup', (event) => {
     }
 });
 
+window.addEventListener('mousedown', (event) => {
+    if (event.button === 0) {
+        attackPlayer();
+    }
+});
+
 export function updatePlayerPosition() {
-    let nextX = playerPosition.x;
-    let nextY = playerPosition.y;
+    let nextX = playerInformations.x;
+    let nextY = playerInformations.y;
 
     if (indicatesKey.w) {
-        nextY += playerPosition.speed;
+        nextY += playerInformations.speed;
     }
     if (indicatesKey.s) {
-        nextY -= playerPosition.speed;
+        nextY -= playerInformations.speed;
     }
     if (indicatesKey.a) {
-        playerPosition.direction = -1;
-        nextX -= playerPosition.speed;
+        playerInformations.direction = -1;
+        nextX -= playerInformations.speed;
     }
     if (indicatesKey.d) {
-        playerPosition.direction = 1;
-        nextX += playerPosition.speed;
+        playerInformations.direction = 1;
+        nextX += playerInformations.speed;
     }
 
     const playerFuturePosition = {
         x: nextX,
         y: nextY,
-        width: playerSize.player.width,
-        height: playerSize.player.height
+        width: playerCollision.player.width,
+        height: playerCollision.player.height
     };
 
     let hasCollision = false;
-
 
     for (const enemy of enemyPositions) {
         const enemyType = Object.keys(enemy)[0];
@@ -138,13 +157,17 @@ export function updatePlayerPosition() {
     }
 
     if (!hasCollision) {
-        playerPosition.x = nextX;
-        playerPosition.y = nextY;
+        playerInformations.x = nextX;
+        playerInformations.y = nextY;
     }
 }
 
 const playerSize = {
-    player: { width: 0.14, height: 0.14 }
+    player: { width: 0.26, height: 0.26 }
+};
+
+const playerCollision = {
+    player: { width: 0.04, height: 0.04 }
 };
 
 function collisionDetection(enemyPositions, enemyCollision, playerPosition) {
@@ -161,26 +184,49 @@ function collisionDetection(enemyPositions, enemyCollision, playerPosition) {
     return playerRight > enemyLeft && playerLeft < enemyRight && playerTop > enemyBottom && playerBottom < enemyTop;
 }
 
-export function drawPlayer(gl, player, texture, currentTime) {
+export function drawPlayer(gl, player, textures, currentTime) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.useProgram(player.program);
     gl.bindVertexArray(player.vao);
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(player.textureLocation, 0);
-    gl.uniform2f(player.sizeLocation, (playerSize.player.width * playerPosition.direction), playerSize.player.height);
-    gl.uniform2f(player.positionLocation, playerPosition.x, playerPosition.y);
+    gl.uniform2f(player.sizeLocation, (playerSize.player.width * playerInformations.direction), playerSize.player.height);
+    gl.uniform2f(player.positionLocation, playerInformations.x, playerInformations.y);
 
-    if ((currentTime - playerPosition.time) > configFrames.player.frameDuration) {
-        playerPosition.currentFrame = (playerPosition.currentFrame + 1) % configFrames.player.frames;
-        playerPosition.time = currentTime;
+    let currentStatePlayer;
+
+    if (playerInformations.state === 'attacking') {
+        currentStatePlayer = 'playerAttack';
+    } else if (indicatesKey.w || indicatesKey.a || indicatesKey.s || indicatesKey.d) {
+        currentStatePlayer = 'playerWalking';
+    } else {
+        currentStatePlayer = 'playerIdle';
     }
 
-    const frameDurationX = (playerPosition.currentFrame % configFrames.player.columns) / configFrames.player.columns;
-    const frameDurationY = configFrames.player.animationRow / configFrames.player.rows;
+    const configType = configFrames[currentStatePlayer];
+    const selectedTexture = textures[currentStatePlayer];
 
-    gl.uniform2f(player.frameScaleLocation, 1 / configFrames.player.columns, 1 / configFrames.player.rows);
+    gl.bindTexture(gl.TEXTURE_2D, selectedTexture);
+
+    if ((currentTime - playerInformations.time) > configType.frameDuration) {
+        playerInformations.currentFrame++;
+        playerInformations.time = currentTime;
+
+        if (playerInformations.currentFrame >= configType.frames) {
+            if (playerInformations.state === 'attacking') {
+                playerInformations.state = 'idle';
+                playerInformations.currentFrame = 0;
+            } else {
+                playerInformations.currentFrame = 0;
+            }
+        }
+    }
+
+    const frameDurationX = (playerInformations.currentFrame % configType.columns) / configType.columns;
+    const frameDurationY = configType.animationRow / configType.rows;
+
+    gl.uniform2f(player.frameScaleLocation, 1 / configType.columns, 1 / configType.rows);
     gl.uniform2f(player.frameDislocationLocation, frameDurationX, frameDurationY);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 

@@ -35,12 +35,14 @@ function loadImage(path) {
 }
 
 async function start() {
-    const [backgroundTexture, enemySlime, enemySkeleton, enemyPig, playerTexture, towerTexture] = await Promise.all([
+    const [backgroundTexture, enemySlime, enemySkeleton, enemyPig, playerIdle, playerWalking, playerAttack, towerTexture] = await Promise.all([
         loadImage('./Img/background.png'),
         loadImage('./Img/slimeGreen.png'),
         loadImage('./Img/skeleton.png'),
         loadImage('./Img/pig.png'),
-        loadImage('./Img/player.png'),
+        loadImage('./Img/playerIdle.png'),
+        loadImage('./Img/playerWalking.png'),
+        loadImage('./Img/playerAttack.png'),
         loadImage('./Img/tower.png')
     ]);
 
@@ -54,17 +56,23 @@ async function start() {
         skeleton: enemySkeleton,
         pig: enemyPig
     }
-    
+
+    const playerTextures = {
+        playerIdle: playerIdle,
+        playerWalking: playerWalking,
+        playerAttack: playerAttack
+    };
+
     function render(currentTime) {
         updatePlayerPosition();
-        
+
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         drawBackground(gl, background, backgroundTexture);
         drawEnemies(gl, enemies, enemyTextures, currentTime);
-        drawPlayer(gl, player, playerTexture, currentTime);
+        drawPlayer(gl, player, playerTextures, currentTime);
         drawTower(gl, tower, towerTexture, currentTime);
 
         requestAnimationFrame(render);
