@@ -46,6 +46,7 @@ export async function setupTower(gl) {
         program,
         vao,
         textureLocation: gl.getUniformLocation(program, 'towerTexture'),
+        colorLocation: gl.getUniformLocation(program, 'towerColor'),
         positionLocation: gl.getUniformLocation(program, 'towerPosition'),
         sizeLocation: gl.getUniformLocation(program, 'towerSize'),
         frameDislocationLocation: gl.getUniformLocation(program, 'towerFrameDislocation'),
@@ -86,6 +87,7 @@ export function drawTower(gl, tower, texture, currentTime) {
 
     gl.uniform2f(tower.frameScaleLocation, 1 / configFrames.tower.columns, 1 / configFrames.tower.rows);
     gl.uniform2f(tower.frameDislocationLocation, frameDurationX, frameDurationY);
+    gl.uniform4f(tower.colorLocation, 0.6, 1.0, 0.85, 1.0); 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     gl.bindVertexArray(null);

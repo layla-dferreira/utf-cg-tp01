@@ -2,10 +2,12 @@
 
 precision highp float;
 uniform sampler2D towerTexture;
+uniform vec4 towerColor;
 
 in vec2 textureCoordinate;
 out vec4 outColor;
 
 void main() {
-    outColor = texture(towerTexture, textureCoordinate);
+    vec4 textureColor = texture(towerTexture, textureCoordinate);
+    outColor = textureColor * towerColor;
 }
