@@ -1,8 +1,8 @@
 import { createProgram, createShader } from '../utils.js';
-import { enemyPositions, enemyCollision } from '../Enemies/enemies.js';
+import { enemyInformations, enemyCollision } from '../Enemies/enemies.js';
 import { towerPosition, towerCollision } from '../Tower/tower.js';
 
-const playerInformations = { x: 0.4, y: 0.1, currentFrame: 0, time: 0, speed: 0.01, direction: 1, state: 'playerWalking' };
+export const playerInformations = { x: 0.4, y: 0.1, currentFrame: 0, time: 0, speed: 0.01, direction: 1, state: 'playerWalking', attack: 10, attacking: 0 };
 
 export async function setupPlayer(gl) {
     const [vertexShaderResponse, fragmentShaderResponse] = await Promise.all([
@@ -72,8 +72,13 @@ function attackPlayer() {
     if (playerInformations.state !== 'attacking') {
         playerInformations.state = 'attacking';
         playerInformations.currentFrame = 0;
+        playerInformations.attacking++;
     }
 }
+export const attackCollision = {
+    width: 0.15,
+    height: 0.15,
+};
 
 window.addEventListener('keydown', (event) => {
     const key = event.key.toLowerCase();
@@ -131,7 +136,7 @@ export function updatePlayerPosition() {
 
     let hasCollision = false;
 
-    for (const enemy of enemyPositions) {
+    for (const enemy of enemyInformations) {
         const enemyType = Object.keys(enemy)[0];
         const enemyPosition = enemy[enemyType];
         const enemiesCollision = enemyCollision[enemyType];
@@ -170,7 +175,7 @@ const playerCollision = {
     player: { width: 0.04, height: 0.04 }
 };
 
-function collisionDetection(enemyPositions, enemyCollision, playerPosition) {
+export function collisionDetection(enemyPositions, enemyCollision, playerPosition) {
     const playerLeft = playerPosition.x - playerPosition.width / 2;
     const playerRight = playerPosition.x + playerPosition.width / 2;
     const playerTop = playerPosition.y + playerPosition.height / 2;

@@ -1,9 +1,10 @@
 import { createProgram, createShader } from '../utils.js';
+import { playerInformations, collisionDetection, attackCollision } from '../Player/player.js';
 
-export const enemyPositions = [
-    { slime: { x: 0.0, y: 0.0, currentFrame: 0, time: 0 } },
-    { skeleton: { x: 0.6, y: -0.5, currentFrame: 0, time: 0 } },
-    { pig: { x: -0.7, y: 0.2, currentFrame: 0, time: 0 } }
+export const enemyInformations = [
+    { slime: { x: 0.0, y: 0.0, currentFrame: 0, time: 0, health: 30, attacking: 0 } },
+    { skeleton: { x: 0.6, y: -0.5, currentFrame: 0, time: 0, health: 50, attacking: 0 } },
+    { pig: { x: -0.7, y: 0.2, currentFrame: 0, time: 0, health: 40, attacking: 0 } }
 ];
 
 export async function setupEnemies(gl) {
@@ -58,9 +59,9 @@ export async function setupEnemies(gl) {
 }
 
 const configFrames = {
-    slime: { frames: 8, columns: 8, rows: 3, animationRow: 1, frameDuration: 100 },
-    skeleton: { frames: 6, columns: 6, rows: 10, animationRow: 5, frameDuration: 100 },
-    pig: { frames: 12, columns: 12, rows: 1, animationRow: 0, frameDuration: 100 }
+    slime: { frames: 8, columns: 8, rows: 3, animationRow: 1, frameDuration: 100, health: 30 },
+    skeleton: { frames: 6, columns: 6, rows: 10, animationRow: 5, frameDuration: 100, health: 50 },
+    pig: { frames: 12, columns: 12, rows: 1, animationRow: 0, frameDuration: 100, health: 40 }
 };
 
 const enemySize = {
@@ -75,6 +76,42 @@ export const enemyCollision = {
     pig: { width: 0.14, height: 0.24, offsetY: 0.02 }
 };
 
+export function enemyHits() {
+    const playerPosition = {
+        x: playerInformations.x,
+        y: playerInformations.y,
+        width: attackCollision.width,
+        height: attackCollision.height
+    };
+
+    if (playerInformations.state === 'attacking') {
+        enemyInformations.forEach((enemyEntry) => {
+            const [type, enemy] = Object.entries(enemyEntry)[0];
+            const collision = enemyCollision[type];
+
+            const enemyCollisionPosition = {
+                x: enemy.x,
+                y: enemy.y + collision.offsetY,
+            };
+
+            if (collisionDetection(enemyCollisionPosition, collision, playerPosition) && enemy.attacking !== playerInformations.attacking) {
+                enemy.health -= playerInformations.attack;
+                enemy.attacking = playerInformations.attacking;
+            }
+        });
+    }
+}
+
+export function removeDeadEnemies() {
+    for (let i = enemyInformations.length - 1; i >= 0; i--) {
+        const [, enemy] = Object.entries(enemyInformations[i])[0];
+
+        if (enemy.health <= 0) {
+            enemyInformations.splice(i, 1);
+        }
+    }
+}
+
 export function drawEnemies(gl, enemies, textures, currentTime) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -82,7 +119,7 @@ export function drawEnemies(gl, enemies, textures, currentTime) {
     gl.bindVertexArray(enemies.vao);
     gl.activeTexture(gl.TEXTURE0);
 
-    enemyPositions.forEach((enemyEntry) => {
+    enemyInformations.forEach((enemyEntry) => {
         const [type, enemy] = Object.entries(enemyEntry)[0];
         const configType = configFrames[type];
 
