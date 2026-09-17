@@ -171,7 +171,7 @@ const playerSize = {
     player: { width: 0.26, height: 0.26 }
 };
 
-const playerCollision = {
+export const playerCollision = {
     player: { width: 0.04, height: 0.04 }
 };
 

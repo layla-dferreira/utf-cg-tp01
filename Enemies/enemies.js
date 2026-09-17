@@ -1,11 +1,8 @@
 import { createProgram, createShader } from '../utils.js';
-import { playerInformations, collisionDetection, attackCollision } from '../Player/player.js';
+import { playerInformations, collisionDetection, attackCollision, playerCollision } from '../Player/player.js';
+import { towerPosition } from '../Tower/tower.js';
 
-export const enemyInformations = [
-    { slime: { x: 0.0, y: 0.0, currentFrame: 0, time: 0, health: 30, attacking: 0 } },
-    { skeleton: { x: 0.6, y: -0.5, currentFrame: 0, time: 0, health: 50, attacking: 0 } },
-    { pig: { x: -0.7, y: 0.2, currentFrame: 0, time: 0, health: 40, attacking: 0 } }
-];
+export const enemyInformations = [];
 
 export async function setupEnemies(gl) {
     const [vertexShaderResponse, fragmentShaderResponse] = await Promise.all([
@@ -76,6 +73,70 @@ export const enemyCollision = {
     pig: { width: 0.14, height: 0.24, offsetY: 0.02 }
 };
 
+let spawnTime = 0;
+const spawnInterval = 2000;
+const enemySpeed = 0.002;
+const towerStopDistance = 0.18;
+
+export function spawnEnemy(currentTime) {
+    if (currentTime - spawnTime > spawnInterval) {
+        const enemyTypes = ['slime', 'skeleton', 'pig'];
+        const randomType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+        const startX = 1.2;
+        const startY = (Math.random() * 1.6) - 0.8;
+
+        const newEnemy = {
+            [randomType]: {
+                x: startX,
+                y: startY,
+                currentFrame: 0,
+                time: currentTime,
+                health: configFrames[randomType].health,
+                attacking: 0,
+                direction: -1
+            }
+        };
+        enemyInformations.push(newEnemy);
+        spawnTime = currentTime;
+    }
+}
+
+export function updateEnemyPositions() {
+    enemyInformations.forEach((enemyEntry) => {
+        const [, enemy] = Object.entries(enemyEntry)[0];
+        const distanceX = towerPosition.x - enemy.x;
+        const distanceY = towerPosition.y - enemy.y;
+        const distanceTower = Math.hypot(distanceX, distanceY);
+
+        if (distanceTower > towerStopDistance) {
+            const nextPosition = {
+                x: enemy.x + (distanceX / distanceTower) * enemySpeed,
+                y: enemy.y + (distanceY / distanceTower) * enemySpeed
+            };
+            const enemyPosition = {
+                x: nextPosition.x,
+                y: nextPosition.y + enemyCollision[Object.keys(enemyEntry)[0]].offsetY
+            };
+            const playerPosition = {
+                x: playerInformations.x,
+                y: playerInformations.y,
+                width: playerCollision.player.width,
+                height: playerCollision.player.height
+            };
+
+            if (!collisionDetection(enemyPosition, enemyCollision[Object.keys(enemyEntry)[0]], playerPosition)) {
+                enemy.x = nextPosition.x;
+                enemy.y = nextPosition.y;
+            }
+            if (distanceX < 0) {
+                enemy.direction = -1;
+            } else {
+                enemy.direction = 1;
+            }
+        }
+    });
+}
+
 export function enemyHits() {
     const playerPosition = {
         x: playerInformations.x,
@@ -133,7 +194,7 @@ export function drawEnemies(gl, enemies, textures, currentTime) {
 
         gl.uniform2f(enemies.frameScaleLocation, 1 / configType.columns, 1 / configType.rows);
         gl.uniform2f(enemies.frameDislocationLocation, frameDurationX, frameDurationY);
-        gl.uniform2f(enemies.sizeLocation, enemySize[type].width, enemySize[type].height);
+        gl.uniform2f(enemies.sizeLocation, (enemySize[type].width * enemy.direction), enemySize[type].height);
 
         gl.bindTexture(gl.TEXTURE_2D, textures[type]);
         gl.uniform1i(enemies.textureLocation, 0);

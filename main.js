@@ -1,6 +1,6 @@
 import { createTexture } from './utils.js';
 import { setupBackground, drawBackground } from './Background/background.js';
-import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies } from './Enemies/enemies.js';
+import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions } from './Enemies/enemies.js';
 import { setupPlayer, drawPlayer, updatePlayerPosition } from './Player/player.js';
 import { setupTower, drawTower } from './Tower/tower.js';
 
@@ -65,6 +65,8 @@ async function start() {
 
     function render(currentTime) {
         updatePlayerPosition();
+        spawnEnemy(currentTime);
+        updateEnemyPositions();
         enemyHits();
         removeDeadEnemies();
 
