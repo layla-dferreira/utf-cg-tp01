@@ -1,6 +1,8 @@
 import { createProgram, createShader } from '../utils.js';
+import { enemyInformations, enemyCollision } from '../Enemies/enemies.js';
+import { collisionDetection } from '../Player/player.js';
 
-export const towerPosition = { x: -0.4, y: 0.3, currentFrame: 0, time: 0 };
+export const towerInformations = { x: -0.4, y: 0.3, currentFrame: 0, time: 0, health: 100, destroyed: false };
 
 export async function setupTower(gl) {
     const [vertexShaderResponse, fragmentShaderResponse] = await Promise.all([
@@ -66,6 +68,39 @@ export const towerCollision = {
     tower: { width: 0.38, height: 0.50, offsetY: -0.12 }
 };
 
+const attackInterval = 500;
+const towerMaxHealth = 100;
+
+export function towerHit(currentTime) {
+    const towerPosition = {
+        x: towerInformations.x,
+        y: towerInformations.y,
+        width: towerCollision.tower.width,
+        height: towerCollision.tower.height
+    };
+
+    enemyInformations.forEach((enemyEntry) => {
+        const [type, enemy] = Object.entries(enemyEntry)[0];
+        const collision = enemyCollision[type];
+
+        const enemyCollisionPosition = {
+            x: enemy.x,
+            y: enemy.y + collision.offsetY,
+        };
+
+        if (collisionDetection(enemyCollisionPosition, collision, towerPosition) && enemy.health > 0 && currentTime - (enemy.attack || 0) >= attackInterval) {
+            towerInformations.health -= 1;
+            enemy.attack = currentTime;
+        }
+    });
+
+    if (towerInformations.health <= 0) {
+        towerInformations.health = 0;
+        towerInformations.destroyed = true;
+        console.log("GAME OVER! A torre foi destruída.");
+    }
+}
+
 export function drawTower(gl, tower, texture, currentTime) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -75,19 +110,26 @@ export function drawTower(gl, tower, texture, currentTime) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(tower.textureLocation, 0);
     gl.uniform2f(tower.sizeLocation, towerSize.tower.width, towerSize.tower.height);
-    gl.uniform2f(tower.positionLocation, towerPosition.x, towerPosition.y);
+    gl.uniform2f(tower.positionLocation, towerInformations.x, towerInformations.y);
 
-    if ((currentTime - towerPosition.time) > configFrames.tower.frameDuration) {
-        towerPosition.currentFrame = (towerPosition.currentFrame + 1) % configFrames.tower.frames;
-        towerPosition.time = currentTime;
+    if ((currentTime - towerInformations.time) > configFrames.tower.frameDuration) {
+        towerInformations.currentFrame = (towerInformations.currentFrame + 1) % configFrames.tower.frames;
+        towerInformations.time = currentTime;
     }
 
-    const frameDurationX = (towerPosition.currentFrame % configFrames.tower.columns) / configFrames.tower.columns;
+    const frameDurationX = (towerInformations.currentFrame % configFrames.tower.columns) / configFrames.tower.columns;
     const frameDurationY = configFrames.tower.animationRow / configFrames.tower.rows;
 
     gl.uniform2f(tower.frameScaleLocation, 1 / configFrames.tower.columns, 1 / configFrames.tower.rows);
     gl.uniform2f(tower.frameDislocationLocation, frameDurationX, frameDurationY);
-    gl.uniform4f(tower.colorLocation, 0.6, 1.0, 0.85, 1.0); 
+
+    const healthColor = towerInformations.health / towerMaxHealth;
+    const damageColor = 1 - healthColor;
+    const red = 0.6 + (0.4 * damageColor);
+    const green = 1 - (0.8 * damageColor);
+    const blue = 0.85 - (0.65 * damageColor);
+
+    gl.uniform4f(tower.colorLocation, red, green, blue, 1.0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     gl.bindVertexArray(null);

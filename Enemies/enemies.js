@@ -1,6 +1,6 @@
 import { createProgram, createShader } from '../utils.js';
 import { playerInformations, collisionDetection, attackCollision, playerCollision } from '../Player/player.js';
-import { towerPosition } from '../Tower/tower.js';
+import { towerInformations } from '../Tower/tower.js';
 
 export const enemyInformations = [];
 
@@ -104,8 +104,8 @@ export function spawnEnemy(currentTime) {
 export function updateEnemyPositions() {
     enemyInformations.forEach((enemyEntry) => {
         const [, enemy] = Object.entries(enemyEntry)[0];
-        const distanceX = towerPosition.x - enemy.x;
-        const distanceY = towerPosition.y - enemy.y;
+        const distanceX = towerInformations.x - enemy.x;
+        const distanceY = towerInformations.y - enemy.y;
         const distanceTower = Math.hypot(distanceX, distanceY);
 
         if (distanceTower > towerStopDistance) {

@@ -2,7 +2,7 @@ import { createTexture } from './utils.js';
 import { setupBackground, drawBackground } from './Background/background.js';
 import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions } from './Enemies/enemies.js';
 import { setupPlayer, drawPlayer, updatePlayerPosition } from './Player/player.js';
-import { setupTower, drawTower } from './Tower/tower.js';
+import { setupTower, drawTower, towerHit } from './Tower/tower.js';
 
 /* function ortho(left, right, bottom, top, near, far) {
   const tx = -(right + left) / (right - left)
@@ -68,6 +68,7 @@ async function start() {
         spawnEnemy(currentTime);
         updateEnemyPositions();
         enemyHits();
+        towerHit(currentTime);
         removeDeadEnemies();
 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);

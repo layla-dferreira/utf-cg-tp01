@@ -1,6 +1,6 @@
 import { createProgram, createShader } from '../utils.js';
 import { enemyInformations, enemyCollision } from '../Enemies/enemies.js';
-import { towerPosition, towerCollision } from '../Tower/tower.js';
+import { towerInformations, towerCollision } from '../Tower/tower.js';
 
 export const playerInformations = { x: 0.4, y: 0.1, currentFrame: 0, time: 0, speed: 0.01, direction: 1, state: 'playerWalking', attack: 10, attacking: 0 };
 
@@ -153,8 +153,8 @@ export function updatePlayerPosition() {
     }
 
     const towerCollisionPosition = {
-        x: towerPosition.x,
-        y: towerPosition.y + towerCollision.tower.offsetY
+        x: towerInformations.x,
+        y: towerInformations.y + towerCollision.tower.offsetY
     };
 
     if (collisionDetection(towerCollisionPosition, towerCollision.tower, playerFuturePosition)) {
