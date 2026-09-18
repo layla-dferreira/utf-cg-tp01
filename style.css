@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap');
+
+body {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+}
+
+.canvas-tower-defense {
+    display: block;
+}
+
+#gameOver {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: Audiowide, sans-serif;
+    z-index: 10;
+}
+
+#gameOver h1 {
+    font-size: 32px;
+    margin: 0 0 8px;
+}
+
+#gameOver p {
+    font-size: 26px;
+    margin: 0 0 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#restartButton {
+    padding: 10px 20px;
+    font-family: Audiowide, sans-serif;
+    font-size: 18px;
+    background-color: #075985;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#restartButton:hover {
+    background-color: #075985;
+}

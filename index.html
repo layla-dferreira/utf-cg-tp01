@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tower Defense</title>
-    <link rel="stylesheet" href="./Background/style.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
     <canvas class="canvas-tower-defense" width="500" height="500"></canvas>
+
+    <div id="gameOver" class="hidden">
+        <h1>Game Over!</h1>
+        <p>Sua torre foi destruída!</p>
+        <button id="restartButton">Tentar Novamente</button>
+    </div>
+
     <script type="module" src="./main.js"></script>
 </body>

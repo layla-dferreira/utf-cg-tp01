@@ -69,7 +69,7 @@ export const towerCollision = {
 };
 
 const attackInterval = 500;
-const towerMaxHealth = 100;
+export const towerMaxHealth = 100;
 
 export function towerHit(currentTime) {
     const towerPosition = {

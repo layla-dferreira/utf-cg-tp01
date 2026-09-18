@@ -1,8 +1,8 @@
 import { createTexture } from './utils.js';
 import { setupBackground, drawBackground } from './Background/background.js';
-import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions } from './Enemies/enemies.js';
-import { setupPlayer, drawPlayer, updatePlayerPosition } from './Player/player.js';
-import { setupTower, drawTower, towerHit } from './Tower/tower.js';
+import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions, enemyInformations } from './Enemies/enemies.js';
+import { setupPlayer, drawPlayer, updatePlayerPosition, playerInformations } from './Player/player.js';
+import { setupTower, drawTower, towerHit, towerInformations, towerMaxHealth } from './Tower/tower.js';
 
 /* function ortho(left, right, bottom, top, near, far) {
   const tx = -(right + left) / (right - left)
@@ -63,7 +63,36 @@ async function start() {
         playerAttack: playerAttack
     };
 
+    const gameOver = document.getElementById('gameOver');
+    const restartButton = document.getElementById('restartButton');
+
+    let isGameOver = false;
+
+    restartButton.addEventListener('click', () => {
+        towerInformations.health = towerMaxHealth;
+        towerInformations.destroyed = false;
+
+        playerInformations.x = 0.4;
+        playerInformations.y = 0.1;
+        playerInformations.state = 'playerIdle';
+
+        enemyInformations.length = 0;
+
+        gameOver.classList.add('hidden');
+        isGameOver = false;
+
+        requestAnimationFrame(render);
+    });
+
     function render(currentTime) {
+        if (towerInformations.destroyed) {
+            if (!isGameOver) {
+                isGameOver = true;
+                gameOver.classList.remove('hidden');
+            }
+            return;
+        }
+
         updatePlayerPosition();
         spawnEnemy(currentTime);
         updateEnemyPositions();
