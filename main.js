@@ -3,6 +3,7 @@ import { setupBackground, drawBackground } from './Background/background.js';
 import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions, enemyInformations } from './Enemies/enemies.js';
 import { setupPlayer, drawPlayer, updatePlayerPosition, playerInformations } from './Player/player.js';
 import { setupTower, drawTower, towerHit, towerInformations, towerMaxHealth, towerProjectileHit, updateProjectiles, drawProjectiles } from './Tower/tower.js';
+import { setupBar, drawBar } from './Tower/bar/bar.js';
 
 /* function ortho(left, right, bottom, top, near, far) {
   const tx = -(right + left) / (right - left)
@@ -51,6 +52,7 @@ async function start() {
     const enemies = await setupEnemies(gl);
     const player = await setupPlayer(gl);
     const tower = await setupTower(gl);
+    const bar = await setupBar(gl);
 
     const enemyTextures = {
         slime: enemySlime,
@@ -105,7 +107,7 @@ async function start() {
         enemyHits();
 
         towerHit(currentTime);
-        
+
         removeDeadEnemies();
 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -117,6 +119,7 @@ async function start() {
         drawPlayer(gl, player, playerTextures, currentTime);
         drawProjectiles(gl, tower, projectileTexture);
         drawTower(gl, tower, towerTexture, currentTime);
+        drawBar(gl, bar, towerInformations.x, towerInformations.y + 0.3, towerInformations.health, towerMaxHealth);
 
         requestAnimationFrame(render);
     }

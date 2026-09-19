@@ -2,7 +2,7 @@ import { createProgram, createShader } from '../utils.js';
 import { enemyInformations, enemyCollision, enemySpeedAttack } from '../Enemies/enemies.js';
 import { collisionDetection } from '../Player/player.js';
 
-export const towerInformations = { x: -0.4, y: 0.3, currentFrame: 0, time: 0, health: 100, destroyed: false };
+export const towerInformations = { x: 0.0, y: 0.2, currentFrame: 0, time: 0, health: 100, destroyed: false };
 
 export async function setupTower(gl) {
     const [vertexShaderResponse, fragmentShaderResponse] = await Promise.all([
@@ -190,13 +190,7 @@ export function drawTower(gl, tower, texture, currentTime) {
     gl.uniform2f(tower.frameScaleLocation, 1 / configFrames.tower.columns, 1 / configFrames.tower.rows);
     gl.uniform2f(tower.frameDislocationLocation, frameDurationX, frameDurationY);
 
-    const healthColor = towerInformations.health / towerMaxHealth;
-    const damageColor = 1 - healthColor;
-    const red = 0.6 + (0.4 * damageColor);
-    const green = 1 - (0.8 * damageColor);
-    const blue = 0.85 - (0.65 * damageColor);
-
-    gl.uniform4f(tower.colorLocation, red, green, blue, 1.0);
+    gl.uniform4f(tower.colorLocation, 1.0, 1.0, 1.0, 1.0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     gl.bindVertexArray(null);
