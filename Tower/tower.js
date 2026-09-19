@@ -1,5 +1,5 @@
 import { createProgram, createShader } from '../utils.js';
-import { enemyInformations, enemyCollision } from '../Enemies/enemies.js';
+import { enemyInformations, enemyCollision, enemySpeedAttack } from '../Enemies/enemies.js';
 import { collisionDetection } from '../Player/player.js';
 
 export const towerInformations = { x: -0.4, y: 0.3, currentFrame: 0, time: 0, health: 100, destroyed: false };
@@ -156,16 +156,15 @@ export function towerHit(currentTime) {
             y: enemy.y + collision.offsetY,
         };
 
-        if (collisionDetection(enemyCollisionPosition, collision, towerPosition) && enemy.health > 0 && currentTime - (enemy.attack || 0) >= attackInterval) {
-            towerInformations.health -= 1;
-            enemy.attack = currentTime;
+        if (collisionDetection(enemyCollisionPosition, collision, towerPosition) && enemy.health > 0 && currentTime - (enemy.attackTime || 0) >= attackInterval) {
+            towerInformations.health -= enemySpeedAttack[type].attack;
+            enemy.attackTime = currentTime;
         }
     });
 
     if (towerInformations.health <= 0) {
         towerInformations.health = 0;
         towerInformations.destroyed = true;
-        console.log("GAME OVER! A torre foi destruída.");
     }
 }
 

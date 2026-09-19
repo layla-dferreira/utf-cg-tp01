@@ -61,6 +61,12 @@ const configFrames = {
     pig: { frames: 12, columns: 12, rows: 1, animationRow: 0, frameDuration: 100, health: 40 }
 };
 
+export const enemySpeedAttack = {
+    slime: { attack: 5, speed: 0.0025 },
+    skeleton: { attack: 15, speed: 0.0015 },
+    pig: { attack: 10, speed: 0.002 }
+};
+
 const enemySize = {
     slime: { width: 0.20, height: 0.20 },
     skeleton: { width: 0.16, height: 0.16 },
@@ -75,7 +81,6 @@ export const enemyCollision = {
 
 let spawnTime = 0;
 const spawnInterval = 2000;
-const enemySpeed = 0.002;
 const towerStopDistance = 0.18;
 
 export function spawnEnemy(currentTime) {
@@ -110,8 +115,8 @@ export function updateEnemyPositions() {
 
         if (distanceTower > towerStopDistance) {
             const nextPosition = {
-                x: enemy.x + (distanceX / distanceTower) * enemySpeed,
-                y: enemy.y + (distanceY / distanceTower) * enemySpeed
+                x: enemy.x + (distanceX / distanceTower) * enemySpeedAttack[Object.keys(enemyEntry)[0]].speed,
+                y: enemy.y + (distanceY / distanceTower) * enemySpeedAttack[Object.keys(enemyEntry)[0]].speed
             };
             const enemyPosition = {
                 x: nextPosition.x,
