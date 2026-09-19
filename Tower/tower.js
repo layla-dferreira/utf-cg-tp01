@@ -190,7 +190,7 @@ export function drawTower(gl, tower, texture, currentTime) {
     gl.uniform2f(tower.frameScaleLocation, 1 / configFrames.tower.columns, 1 / configFrames.tower.rows);
     gl.uniform2f(tower.frameDislocationLocation, frameDurationX, frameDurationY);
 
-    gl.uniform4f(tower.colorLocation, 1.0, 1.0, 1.0, 1.0);
+    gl.uniform4f(tower.colorLocation, 0.6, 1.0, 0.85, 1.0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     gl.bindVertexArray(null);
