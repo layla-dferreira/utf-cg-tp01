@@ -2,7 +2,7 @@ import { createTexture } from './utils.js';
 import { setupBackground, drawBackground } from './Background/background.js';
 import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions, enemyInformations } from './Enemies/enemies.js';
 import { setupPlayer, drawPlayer, updatePlayerPosition, playerInformations } from './Player/player.js';
-import { setupTower, drawTower, towerHit, towerInformations, towerMaxHealth } from './Tower/tower.js';
+import { setupTower, drawTower, towerHit, towerInformations, towerMaxHealth, towerProjectileHit, updateProjectiles, drawProjectiles } from './Tower/tower.js';
 
 /* function ortho(left, right, bottom, top, near, far) {
   const tx = -(right + left) / (right - left)
@@ -35,7 +35,7 @@ function loadImage(path) {
 }
 
 async function start() {
-    const [backgroundTexture, enemySlime, enemySkeleton, enemyPig, playerIdle, playerWalking, playerAttack, towerTexture] = await Promise.all([
+    const [backgroundTexture, enemySlime, enemySkeleton, enemyPig, playerIdle, playerWalking, playerAttack, towerTexture, projectileTexture] = await Promise.all([
         loadImage('./Img/background.png'),
         loadImage('./Img/slimeGreen.png'),
         loadImage('./Img/skeleton.png'),
@@ -43,7 +43,8 @@ async function start() {
         loadImage('./Img/playerIdle.png'),
         loadImage('./Img/playerWalking.png'),
         loadImage('./Img/playerAttack.png'),
-        loadImage('./Img/tower.png')
+        loadImage('./Img/tower.png'),
+        loadImage('./Img/ball.png')
     ]);
 
     const background = await setupBackground(gl);
@@ -94,10 +95,17 @@ async function start() {
         }
 
         updatePlayerPosition();
+
         spawnEnemy(currentTime);
         updateEnemyPositions();
+
+        towerProjectileHit(currentTime, towerInformations);
+        updateProjectiles();
+
         enemyHits();
+
         towerHit(currentTime);
+        
         removeDeadEnemies();
 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -107,6 +115,7 @@ async function start() {
         drawBackground(gl, background, backgroundTexture);
         drawEnemies(gl, enemies, enemyTextures, currentTime);
         drawPlayer(gl, player, playerTextures, currentTime);
+        drawProjectiles(gl, tower, projectileTexture);
         drawTower(gl, tower, towerTexture, currentTime);
 
         requestAnimationFrame(render);

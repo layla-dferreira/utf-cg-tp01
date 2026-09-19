@@ -71,6 +71,74 @@ export const towerCollision = {
 const attackInterval = 500;
 export const towerMaxHealth = 100;
 
+export const projectiles = [];
+const towerState = {
+    range: 1.0,
+    damage: 10,
+    cooldown: 1000,
+    fireTime: 0,
+    speed: 0.01
+}
+
+export function towerProjectileHit(currentTime, towerPosition) {
+    if (currentTime - towerState.fireTime < towerState.cooldown) {
+        return;
+    }
+    let closestEnemy = null;
+    let closestDistance = towerState.range;
+
+    enemyInformations.forEach((enemyEntry) => {
+        const [, enemy] = Object.entries(enemyEntry)[0];
+        const x = enemy.x - towerPosition.x;
+        const y = enemy.y - towerPosition.y;
+        const distance = Math.hypot(x, y);
+
+        if (distance < closestDistance && enemy.health > 0) {
+            closestDistance = distance;
+            closestEnemy = enemy;
+        }
+    });
+
+    if (closestEnemy !== null) {
+        const nemProjectile = {
+            x: towerPosition.x,
+            y: towerPosition.y,
+            target: closestEnemy,
+            damage: towerState.damage,
+        };
+        projectiles.push(nemProjectile);
+        towerState.fireTime = currentTime;
+    }
+}
+
+export function updateProjectiles() {
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        const projectile = projectiles[i];
+        const target = projectile.target;
+
+        if (target.health <= 0) {
+            projectiles.splice(i, 1);
+            continue;
+        }
+
+        const x = target.x - projectile.x;
+        const y = target.y - projectile.y;
+        const distance = Math.hypot(x, y);
+
+        if (distance < 0.1) {
+            target.health -= projectile.damage;
+            projectiles.splice(i, 1);
+            continue;
+        }
+
+        const velocityX = (x / distance) * towerState.speed;
+        const velocityY = (y / distance) * towerState.speed;
+
+        projectile.x += velocityX;
+        projectile.y += velocityY;
+    }
+}
+
 export function towerHit(currentTime) {
     const towerPosition = {
         x: towerInformations.x,
@@ -131,6 +199,29 @@ export function drawTower(gl, tower, texture, currentTime) {
 
     gl.uniform4f(tower.colorLocation, red, green, blue, 1.0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    gl.bindVertexArray(null);
+    gl.disable(gl.BLEND);
+}
+
+export function drawProjectiles(gl, tower, texture) {
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    gl.useProgram(tower.program);
+    gl.bindVertexArray(tower.vao);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.uniform1i(tower.textureLocation, 0);
+    gl.uniform2f(tower.sizeLocation, 0.05, 0.05);
+
+    projectiles.forEach((projectile) => {
+        gl.uniform2f(tower.positionLocation, projectile.x, projectile.y);
+        gl.uniform2f(tower.frameScaleLocation, 1, 1);
+        gl.uniform2f(tower.frameDislocationLocation, 0, 0);
+        gl.uniform4f(tower.colorLocation, 0.9, 0.75, 1.0, 1.0);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    });
 
     gl.bindVertexArray(null);
     gl.disable(gl.BLEND);
