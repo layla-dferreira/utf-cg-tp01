@@ -66,6 +66,31 @@ async function start() {
         playerAttack: playerAttack
     };
 
+    const fullScreenButton = document.getElementById('fullScreenButton');
+
+    fullScreenButton.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch((err) => {
+                console.error(`Erro ao tentar entrar em tela cheia: ${err.message} (${err.name})`);
+            });
+            fullScreenButton.textContent = "❌";
+        } else {
+            document.exitFullscreen().catch((err) => {
+                console.error(`Erro ao tentar sair da tela cheia: ${err.message} (${err.name})`);
+            });
+            fullScreenButton.innerHTML = `<img src="./Img/maxButton.png" alt="full screen">`;
+        }
+    });
+
+    function resizeCanvas() {
+        const size = Math.min(window.innerWidth, window.innerHeight);
+        canvas.width = size;
+        canvas.height = size;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
     const gameOver = document.getElementById('gameOver');
     const restartButton = document.getElementById('restartButton');
 
