@@ -113,6 +113,13 @@ export function updatePlayerPosition() {
     let nextX = playerInformations.x;
     let nextY = playerInformations.y;
 
+    const limite = {
+        xMinimo: -0.9,
+        xMaximo: 0.9,
+        yMinimo: -0.9,
+        yMaximo: 0.9
+    }
+
     if (indicatesKey.w) {
         nextY += playerInformations.speed;
     }
@@ -126,6 +133,19 @@ export function updatePlayerPosition() {
     if (indicatesKey.d) {
         playerInformations.direction = 1;
         nextX += playerInformations.speed;
+    }
+
+    if (nextX < limite.xMinimo) {
+        nextX = limite.xMinimo;
+    }
+    if (nextX > limite.xMaximo) {
+        nextX = limite.xMaximo;
+    }
+    if (nextY < limite.yMinimo) {
+        nextY = limite.yMinimo;
+    }
+    if (nextY > limite.yMaximo) {
+        nextY = limite.yMaximo;
     }
 
     const playerFuturePosition = {
