@@ -1,5 +1,6 @@
 import { createProgram, createShader } from '../utils.js';
-import { enemyInformations, enemyCollision } from '../Enemies/enemies.js';
+import { enemyInformations, enemyCollision, addPoints } from '../Enemies/enemies.js';
+import { diamondInformations, diamondCollision } from '../Enemies/Diamond/diamond.js';
 import { towerInformations, towerCollision } from '../Tower/tower.js';
 
 export const playerInformations = { x: 0.4, y: 0.1, currentFrame: 0, time: 0, speed: 0.01, direction: 1, state: 'playerWalking', attack: 10, attacking: 0 };
@@ -187,6 +188,29 @@ export function collisionDetection(enemyPositions, enemyCollision, playerPositio
     const enemyBottom = enemyPositions.y - enemyCollision.height / 2;
 
     return playerRight > enemyLeft && playerLeft < enemyRight && playerTop > enemyBottom && playerBottom < enemyTop;
+}
+
+export function collectDiamonds() {
+    const playerDiamondPosition = {
+        x: playerInformations.x,
+        y: playerInformations.y,
+        width: playerCollision.player.width,
+        height: playerCollision.player.height
+    };
+
+    for (let i = diamondInformations.length - 1; i >= 0; i--) {
+        const diamond = diamondInformations[i];
+
+        const diamondPosition = {
+            x: diamond.x,
+            y: diamond.y,
+        };
+
+        if (collisionDetection(diamondPosition, diamondCollision, playerDiamondPosition)) {
+            addPoints(4);
+            diamondInformations.splice(i, 1);
+        }
+    }
 }
 
 export function drawPlayer(gl, player, textures, currentTime) {

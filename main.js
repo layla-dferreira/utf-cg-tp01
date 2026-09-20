@@ -1,7 +1,8 @@
 import { createTexture } from './utils.js';
 import { setupBackground, drawBackground } from './Background/background.js';
-import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions, enemyInformations } from './Enemies/enemies.js';
-import { setupPlayer, drawPlayer, updatePlayerPosition, playerInformations } from './Player/player.js';
+import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions, enemyInformations, pointsState} from './Enemies/enemies.js';
+import { setupDiamond, drawDiamonds, diamondInformations } from './Enemies/Diamond/diamond.js';
+import { setupPlayer, drawPlayer, updatePlayerPosition, playerInformations, collectDiamonds } from './Player/player.js';
 import { setupTower, drawTower, towerHit, towerInformations, towerMaxHealth, towerProjectileHit, updateProjectiles, drawProjectiles } from './Tower/tower.js';
 import { setupBar, drawBar } from './Tower/bar/bar.js';
 
@@ -36,11 +37,12 @@ function loadImage(path) {
 }
 
 async function start() {
-    const [backgroundTexture, enemySlime, enemySkeleton, enemyPig, playerIdle, playerWalking, playerAttack, towerTexture, projectileTexture] = await Promise.all([
+    const [backgroundTexture, enemySlime, enemySkeleton, enemyPig, diamondTexture, playerIdle, playerWalking, playerAttack, towerTexture, projectileTexture] = await Promise.all([
         loadImage('./Img/background.png'),
         loadImage('./Img/slimeGreen.png'),
         loadImage('./Img/skeleton.png'),
         loadImage('./Img/pig.png'),
+        loadImage('./Img/diamond.png'),
         loadImage('./Img/playerIdle.png'),
         loadImage('./Img/playerWalking.png'),
         loadImage('./Img/playerAttack.png'),
@@ -50,6 +52,7 @@ async function start() {
 
     const background = await setupBackground(gl);
     const enemies = await setupEnemies(gl);
+    const diamonds = await setupDiamond(gl);
     const player = await setupPlayer(gl);
     const tower = await setupTower(gl);
     const bar = await setupBar(gl);
@@ -106,6 +109,10 @@ async function start() {
 
         enemyInformations.length = 0;
 
+        diamondInformations.length = 0;
+        pointsState.gamePoints = 0;
+        document.getElementById('points').innerText = 0;
+
         gameOver.classList.add('hidden');
         isGameOver = false;
 
@@ -134,6 +141,7 @@ async function start() {
         towerHit(currentTime);
 
         removeDeadEnemies();
+        collectDiamonds();
 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0, 0, 0, 1);
@@ -144,6 +152,7 @@ async function start() {
         drawPlayer(gl, player, playerTextures, currentTime);
         drawProjectiles(gl, tower, projectileTexture);
         drawTower(gl, tower, towerTexture, currentTime);
+        drawDiamonds(gl, diamonds, diamondTexture, diamondInformations);
         drawBar(gl, bar, towerInformations.x, towerInformations.y + 0.3, towerInformations.health, towerMaxHealth);
 
         requestAnimationFrame(render);

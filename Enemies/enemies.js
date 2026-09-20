@@ -1,6 +1,7 @@
 import { createProgram, createShader } from '../utils.js';
 import { playerInformations, collisionDetection, attackCollision, playerCollision } from '../Player/player.js';
 import { towerInformations } from '../Tower/tower.js';
+import { diamondInformations } from '../Enemies/Diamond/diamond.js';
 
 export const enemyInformations = [];
 
@@ -173,11 +174,31 @@ export function enemyHits(currentTime) {
     }
 }
 
+export const pointsState = {
+    gamePoints: 0
+};
+
+export function addPoints(points) {
+    pointsState.gamePoints += points;
+    document.getElementById('points').innerText = pointsState.gamePoints;
+}
+
 export function removeDeadEnemies() {
     for (let i = enemyInformations.length - 1; i >= 0; i--) {
         const [, enemy] = Object.entries(enemyInformations[i])[0];
 
         if (enemy.health <= 0) {
+            const dropDiamondChance = 0.2;
+
+            if (Math.random() < dropDiamondChance) {
+                diamondInformations.push({
+                    x: enemy.x,
+                    y: enemy.y,
+                    width: 0.04,
+                    height: 0.04
+                });
+            }
+            addPoints(1);
             enemyInformations.splice(i, 1);
         }
     }
