@@ -111,7 +111,7 @@ export function towerProjectileHit(currentTime, towerPosition) {
     }
 }
 
-export function updateProjectiles() {
+export function updateProjectiles(currentTime) {
     for (let i = projectiles.length - 1; i >= 0; i--) {
         const projectile = projectiles[i];
         const target = projectile.target;
@@ -127,6 +127,8 @@ export function updateProjectiles() {
 
         if (distance < 0.1) {
             target.health -= projectile.damage;
+            target.isHit = true;
+            target.hitTime = currentTime;
             projectiles.splice(i, 1);
             continue;
         }

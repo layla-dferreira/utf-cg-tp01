@@ -127,9 +127,9 @@ async function start() {
         updateEnemyPositions();
 
         towerProjectileHit(currentTime, towerInformations);
-        updateProjectiles();
+        updateProjectiles(currentTime);
 
-        enemyHits();
+        enemyHits(currentTime);
 
         towerHit(currentTime);
 

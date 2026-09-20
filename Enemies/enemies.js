@@ -48,6 +48,7 @@ export async function setupEnemies(gl) {
         program,
         vao,
         textureLocation: gl.getUniformLocation(program, 'enemyTexture'),
+        colorLocation: gl.getUniformLocation(program, 'color'),
         positionLocation: gl.getUniformLocation(program, 'enemyPosition'),
         sizeLocation: gl.getUniformLocation(program, 'enemySize'),
         frameDislocationLocation: gl.getUniformLocation(program, 'enemyFrameDislocation'),
@@ -98,7 +99,9 @@ export function spawnEnemy(currentTime) {
                 time: currentTime,
                 health: configFrames[randomType].health,
                 attacking: 0,
-                direction: -1
+                direction: -1,
+                isHit: false,
+                hitTime: 0
             }
         };
         enemyInformations.push(newEnemy);
@@ -142,7 +145,7 @@ export function updateEnemyPositions() {
     });
 }
 
-export function enemyHits() {
+export function enemyHits(currentTime) {
     const playerPosition = {
         x: playerInformations.x,
         y: playerInformations.y,
@@ -163,6 +166,8 @@ export function enemyHits() {
             if (collisionDetection(enemyCollisionPosition, collision, playerPosition) && enemy.attacking !== playerInformations.attacking) {
                 enemy.health -= playerInformations.attack;
                 enemy.attacking = playerInformations.attacking;
+                enemy.isHit = true;
+                enemy.hitTime = currentTime;
             }
         });
     }
@@ -177,6 +182,8 @@ export function removeDeadEnemies() {
         }
     }
 }
+
+const enemyColorTimeHit = 150;
 
 export function drawEnemies(gl, enemies, textures, currentTime) {
     gl.enable(gl.BLEND);
@@ -203,6 +210,17 @@ export function drawEnemies(gl, enemies, textures, currentTime) {
 
         gl.bindTexture(gl.TEXTURE_2D, textures[type]);
         gl.uniform1i(enemies.textureLocation, 0);
+
+        if (enemy.isHit) {
+            if (currentTime - enemy.hitTime > enemyColorTimeHit) {
+                enemy.isHit = false;
+                gl.uniform4f(enemies.colorLocation, 1.0, 1.0, 1.0, 1.0);
+            } else {
+                gl.uniform4f(enemies.colorLocation, 1.0, 0.3, 0.3, 1.0);
+            }
+        } else {
+            gl.uniform4f(enemies.colorLocation, 1.0, 1.0, 1.0, 1.0);
+        }
 
         gl.uniform2f(enemies.positionLocation, enemy.x, enemy.y);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
