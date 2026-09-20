@@ -89,7 +89,14 @@ export function spawnEnemy(currentTime) {
     if (currentTime - spawnTime > spawnInterval) {
         const enemyTypes = ['slime', 'skeleton', 'pig'];
         const randomType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-        const startX = 1.2;
+
+        let startX;
+        if (Math.random() < 0.5) {
+            startX = -1.2;
+        } else {
+            startX = 1.2;
+        }
+
         const startY = (Math.random() * 1.6) - 0.8;
 
         const newEnemy = {
