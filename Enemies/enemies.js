@@ -64,9 +64,9 @@ const configFrames = {
 };
 
 export const enemySpeedAttack = {
-    slime: { attack: 5, speed: 0.0025 },
-    skeleton: { attack: 15, speed: 0.0015 },
-    pig: { attack: 10, speed: 0.002 }
+    slime: { attack: 2, speed: 0.0025 },
+    skeleton: { attack: 6, speed: 0.0015 },
+    pig: { attack: 4, speed: 0.002 }
 };
 
 const enemySize = {
@@ -140,10 +140,32 @@ export function updateEnemyPositions() {
                 height: playerCollision.player.height
             };
 
-            if (!collisionDetection(enemyPosition, enemyCollision[Object.keys(enemyEntry)[0]], playerPosition)) {
+            let collisionPlayer = collisionDetection(enemyPosition, enemyCollision[Object.keys(enemyEntry)[0]], playerPosition);
+
+            if (!collisionPlayer) {
+                for (const otherEntry of enemyInformations) {
+                    if (otherEntry !== enemyEntry) {
+                        const [otherType, otherEnemy] = Object.entries(otherEntry)[0];
+                        const otherCollision = enemyCollision[otherType];
+                        const otherEnemyPosition = {
+                            x: otherEnemy.x,
+                            y: otherEnemy.y + otherCollision.offsetY,
+                            width: otherCollision.width,
+                            height: otherCollision.height
+                        };
+
+                        if (collisionDetection(enemyPosition, enemyCollision[Object.keys(enemyEntry)[0]], otherEnemyPosition)) {
+                            collisionPlayer = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!collisionPlayer) {
                 enemy.x = nextPosition.x;
                 enemy.y = nextPosition.y;
             }
+
             if (distanceX < 0) {
                 enemy.direction = -1;
             } else {
