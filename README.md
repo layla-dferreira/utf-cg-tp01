@@ -9,7 +9,7 @@ inimigos.
 O jogador pode se movimentar pelo cenário, atacar os inimigos e coletar
 diamantes. Enquanto isso, diferentes tipos de inimigos avançam em
 direção à torre. A torre também possui um sistema de ataque automático
-por projéteis.
+por projéteis ou por dano em area.
 
 O objetivo é sobreviver, derrotar os inimigos, acumular pontos e
 impedir que a vida da torre chegue a zero.
@@ -59,6 +59,9 @@ verificando se estão colidindo ao atualizar suas posições
 - Herói: além da(s) torre(s), o jogador poderá controlar (mouse? teclado?) um pequeno personagem 
 que anda pelo cenário e ataca os inimigos próximos de forma automática (como se fosse uma torre móvel)
 - Cor vermelha quando i inimigo é atacado
+- Torres diferentes: permita ao jogador escolher dentre diferentes tipos, como por exemplo uma "torre de 
+gelo" que deixa o inimigo mais lento, ou uma "torre canhão" que atinge uma área e pode causar dano em vários 
+inimigos com cada tiro
 
 ### 5. 🎨 Créditos
 
@@ -70,9 +73,9 @@ Slime e Skeleton --- https://kenmi-art.itch.io/cute-fantasy-rpg
 
 Porco --- https://pixelfrog-assets.itch.io/pixel-adventure-1
 
-Torre --- https://free-game-assets.itch.io/free-archer-towers-pixel-art-for-tower-defense
+Torre de dano com projectile --- https://free-game-assets.itch.io/free-archer-towers-pixel-art-for-tower-defense
 
-Player --- https://pixelfrog-assets.itch.io/tiny-swords
+Player e Torre de dando em area --- https://pixelfrog-assets.itch.io/tiny-swords
 
 Projéteis --- https://www.pngfind.com/mpng/ixmwowh_poder-de-energa-bola-de-esfera-sphere-hd/
 
