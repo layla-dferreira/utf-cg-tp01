@@ -4,7 +4,7 @@ import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, up
 import { setupDiamond, drawDiamonds, diamondInformations } from './Enemies/Diamond/diamond.js';
 import { setupPlayer, drawPlayer, updatePlayerPosition, playerInformations, collectDiamonds } from './Player/player.js';
 import { setupTower, drawTower, towerHit, towerInformations, towerType, stateTower, changeTowerType, isTowerActive } from './Tower/tower.js';
-import { setupBar, drawBar } from './Tower/bar/bar.js';
+import { setupBar, drawBar } from './Tower/Bar/bar.js';
 import { setupProjectile, drawProjectiles, updateProjectiles, towerProjectileHit } from './Tower/Projectile/projectile.js';
 import { setupTowerRange, drawRange, towerAreaHit } from './Tower/Range/range.js';
 
