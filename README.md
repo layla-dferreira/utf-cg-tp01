@@ -37,13 +37,20 @@ Tela do jogo
 
 <img width="1871" height="971" alt="image" src="https://github.com/user-attachments/assets/dfe1c92c-e8d3-4417-a300-94bb4a834408" />
 
+<img width="1872" height="973" alt="image" src="https://github.com/user-attachments/assets/a76200b0-5a1e-4a64-b27c-ed98b1d62ae8" />
+
+
 Tela de jogo / combate
 
 <img width="1874" height="970" alt="image" src="https://github.com/user-attachments/assets/9ba942c7-1333-4e00-84b6-0c91dd09bf5a" />
 
+<img width="1871" height="972" alt="image" src="https://github.com/user-attachments/assets/74a68106-eb7c-481b-96e5-a61001c6de12" />
+
+
 Tela de Game Over
 
-<img width="1870" height="971" alt="image" src="https://github.com/user-attachments/assets/f5d8993d-80b7-4158-958f-40ce7832b0c5" />
+<img width="1871" height="974" alt="image" src="https://github.com/user-attachments/assets/4ee3c0b7-6590-408d-a2f0-b7e8568a73fd" />
+
 
 ### 4. ⭐ Itens opcionais implementados
 
