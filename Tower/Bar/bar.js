@@ -2,8 +2,8 @@ import { createProgram, createShader } from '../../utils.js';
 
 export async function setupBar(gl) {
     const [vertexShaderResponse, fragmentShaderResponse] = await Promise.all([
-        fetch('./Tower/bar/vertexShaderBar.glsl'),
-        fetch('./Tower/bar/fragmentShaderBar.glsl')
+        fetch('./Tower/Bar/vertexShaderBar.glsl'),
+        fetch('./Tower/Bar/fragmentShaderBar.glsl')
     ]);
 
     const [vertexShaderCode, fragmentShaderCode] = await Promise.all([
