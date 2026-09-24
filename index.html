@@ -15,10 +15,22 @@
 
     <button id="fullScreenButton"><img src="./Img/maxButton.png" alt="full screen"></button>
 
+    <div id="startScreen">
+        <h1>Tower Defense</h1>
+        <p>Escolha o tipo de torre:</p>
+        <div id="towerSelection">
+            <button id="projectileTower"><img src="./Img/towerProjectileGame.png" alt="tower projectile">Torre de Projétil</button>
+            <button id="areaTower"><img src="./Img/towerAreaGame.png" alt="tower area">Torre de Área</button>
+        </div>
+    </div>
+
     <div id="gameOver" class="hidden">
         <h1>Game Over!</h1>
         <p>Sua torre foi destruída!</p>
-        <button id="restartButton">Tentar Novamente</button>
+        <div id="towerSelectionRestart">
+            <button id="projectileTowerRestart"> <img src="./Img/towerProjectileGame.png" alt="tower projectile"> Torre de Projétil</button>
+            <button id="areaTowerRestart"> <img src="./Img/towerAreaGame.png" alt="tower area"> Torre de Área</button>
+        </div>
     </div>
 
     <script type="module" src="./main.js"></script>

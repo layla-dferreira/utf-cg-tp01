@@ -1,7 +1,7 @@
 import { createProgram, createShader } from '../utils.js';
 import { enemyInformations, enemyCollision, addPoints } from '../Enemies/enemies.js';
 import { diamondInformations, diamondCollision } from '../Enemies/Diamond/diamond.js';
-import { towerInformations, towerCollision } from '../Tower/tower.js';
+import { towerInformations, towerCollision, stateTower } from '../Tower/tower.js';
 
 export const playerInformations = { x: 0.4, y: 0.1, currentFrame: 0, time: 0, speed: 0.01, direction: 1, state: 'playerWalking', attack: 10, attacking: 0 };
 
@@ -172,13 +172,20 @@ export function updatePlayerPosition() {
             break;
         }
     }
+    
+    let towerCollisionType 
+    if (stateTower.actveTower.attackType === 'area') {
+        towerCollisionType = towerCollision.towerArea;
+    } else {
+        towerCollisionType = towerCollision.towerProjectile;
+    }
 
     const towerCollisionPosition = {
         x: towerInformations.x,
-        y: towerInformations.y + towerCollision.tower.offsetY
+        y: towerInformations.y + towerCollisionType.offsetY
     };
 
-    if (collisionDetection(towerCollisionPosition, towerCollision.tower, playerFuturePosition)) {
+    if (collisionDetection(towerCollisionPosition, towerCollisionType, playerFuturePosition)) {
         hasCollision = true;
     }
 

@@ -1,23 +1,12 @@
 import { createTexture } from './utils.js';
 import { setupBackground, drawBackground } from './Background/background.js';
-import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions, enemyInformations, pointsState} from './Enemies/enemies.js';
+import { setupEnemies, drawEnemies, enemyHits, removeDeadEnemies, spawnEnemy, updateEnemyPositions, enemyInformations, pointsState } from './Enemies/enemies.js';
 import { setupDiamond, drawDiamonds, diamondInformations } from './Enemies/Diamond/diamond.js';
 import { setupPlayer, drawPlayer, updatePlayerPosition, playerInformations, collectDiamonds } from './Player/player.js';
-import { setupTower, drawTower, towerHit, towerInformations, towerMaxHealth, towerProjectileHit, updateProjectiles, drawProjectiles } from './Tower/tower.js';
+import { setupTower, drawTower, towerHit, towerInformations, towerType, stateTower, changeTowerType, isTowerActive } from './Tower/tower.js';
 import { setupBar, drawBar } from './Tower/bar/bar.js';
-
-/* function ortho(left, right, bottom, top, near, far) {
-  const tx = -(right + left) / (right - left)
-  const ty = -(top + bottom) / (top - bottom)
-  const tz = -(far + near) / (far - near)
-
-  return new Float32Array([
-    2 / (right - left), 0, 0, 0,
-    0, 2 / (top - bottom), 0, 0,
-    0, 0, -2 / (far - near), 0,
-    tx, ty, tz, 1
-  ])
-} */
+import { setupProjectile, drawProjectiles, updateProjectiles, towerProjectileHit } from './Tower/Projectile/projectile.js';
+import { setupTowerRange, drawRange, towerAreaHit } from './Tower/Range/range.js';
 
 const canvas = document.querySelector('.canvas-tower-defense');
 const gl = canvas.getContext('webgl2');
@@ -37,7 +26,7 @@ function loadImage(path) {
 }
 
 async function start() {
-    const [backgroundTexture, enemySlime, enemySkeleton, enemyPig, diamondTexture, playerIdle, playerWalking, playerAttack, towerTexture, projectileTexture] = await Promise.all([
+    const [backgroundTexture, enemySlime, enemySkeleton, enemyPig, diamondTexture, playerIdle, playerWalking, playerAttack, towerTexture, towerAreaTexture, projectileTexture] = await Promise.all([
         loadImage('./Img/background.png'),
         loadImage('./Img/slimeGreen.png'),
         loadImage('./Img/skeleton.png'),
@@ -46,8 +35,9 @@ async function start() {
         loadImage('./Img/playerIdle.png'),
         loadImage('./Img/playerWalking.png'),
         loadImage('./Img/playerAttack.png'),
-        loadImage('./Img/tower.png'),
-        loadImage('./Img/ball.png')
+        loadImage('./Img/towerProjectile.png'),
+        loadImage('./Img/towerArea.png'),
+        loadImage('./Img/projectile.png')
     ]);
 
     const background = await setupBackground(gl);
@@ -55,6 +45,8 @@ async function start() {
     const diamonds = await setupDiamond(gl);
     const player = await setupPlayer(gl);
     const tower = await setupTower(gl);
+    const projectile = await setupProjectile(gl);
+    const range = await setupTowerRange(gl);
     const bar = await setupBar(gl);
 
     const enemyTextures = {
@@ -94,14 +86,25 @@ async function start() {
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
+    const startScreen = document.getElementById('startScreen');
     const gameOver = document.getElementById('gameOver');
-    const restartButton = document.getElementById('restartButton');
 
     let isGameOver = false;
 
-    restartButton.addEventListener('click', () => {
-        towerInformations.health = towerMaxHealth;
+    function startGame(type) {
+        changeTowerType(type);
+        startScreen.classList.add('hidden');
+        towerInformations.currentFrame = 0;
+        requestAnimationFrame(render);
+    }
+
+    document.getElementById('projectileTower').addEventListener('click', () => startGame('projectile'));
+    document.getElementById('areaTower').addEventListener('click', () => startGame('area'));
+
+    document.getElementById('projectileTowerRestart').addEventListener('click', () => {
+        towerInformations.health = towerType.projectile.maxHealth;
         towerInformations.destroyed = false;
+        towerInformations.currentFrame = 0;
 
         playerInformations.x = 0.4;
         playerInformations.y = 0.1;
@@ -116,6 +119,28 @@ async function start() {
         gameOver.classList.add('hidden');
         isGameOver = false;
 
+        changeTowerType('projectile');
+        requestAnimationFrame(render);
+    });
+    document.getElementById('areaTowerRestart').addEventListener('click', () => {
+        towerInformations.health = towerType.area.maxHealth;
+        towerInformations.destroyed = false;
+        towerInformations.currentFrame = 0;
+
+        playerInformations.x = 0.4;
+        playerInformations.y = 0.1;
+        playerInformations.state = 'playerIdle';
+
+        enemyInformations.length = 0;
+
+        diamondInformations.length = 0;
+        pointsState.gamePoints = 0;
+        document.getElementById('points').innerText = 0;
+
+        gameOver.classList.add('hidden');
+        isGameOver = false;
+
+        changeTowerType('area');
         requestAnimationFrame(render);
     });
 
@@ -128,14 +153,21 @@ async function start() {
             return;
         }
 
+        let activeTowerTexture;
+
+        if (stateTower.actveTower.attackType === 'projectile') {
+            activeTowerTexture = towerTexture;
+            towerProjectileHit(currentTime, towerInformations);
+            updateProjectiles(currentTime);
+        } else {
+            activeTowerTexture = towerAreaTexture;
+            towerAreaHit(currentTime, enemyInformations);
+        }
+
         updatePlayerPosition();
 
         spawnEnemy(currentTime);
         updateEnemyPositions();
-
-        towerProjectileHit(currentTime, towerInformations);
-        updateProjectiles(currentTime);
-
         enemyHits(currentTime);
 
         towerHit(currentTime);
@@ -149,16 +181,23 @@ async function start() {
 
         drawBackground(gl, background, backgroundTexture);
         drawEnemies(gl, enemies, enemyTextures, currentTime);
+
+        if (isTowerActive(currentTime) && stateTower.actveTower.attackType === 'area') {
+            drawRange(gl, range, towerInformations.x, towerInformations.y, stateTower.actveTower.range);
+        }
+
         drawPlayer(gl, player, playerTextures, currentTime);
-        drawProjectiles(gl, tower, projectileTexture);
-        drawTower(gl, tower, towerTexture, currentTime);
+
+        if (stateTower.actveTower.attackType === 'projectile') {
+            drawProjectiles(gl, projectile, projectileTexture);
+        }
+
+        drawTower(gl, tower, activeTowerTexture, currentTime);
         drawDiamonds(gl, diamonds, diamondTexture, diamondInformations);
-        drawBar(gl, bar, towerInformations.x, towerInformations.y + 0.3, towerInformations.health, towerMaxHealth);
+        drawBar(gl, bar, towerInformations.x, towerInformations.y + 0.3, towerInformations.health, stateTower.actveTower.maxHealth);
 
         requestAnimationFrame(render);
     }
-
-    requestAnimationFrame(render);
 }
 
 try {

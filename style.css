@@ -50,6 +50,66 @@ body {
     width: 20px;
 }
 
+#startScreen {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.88);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Audiowide', sans-serif;
+    z-index: 20;
+    gap: 12px;
+}
+
+#towerSelection, #towerSelectionRestart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+#towerSelection button, #towerSelectionRestart button {
+    padding: 8px 16px; 
+    font-size: 13px; 
+    font-family: 'Audiowide', sans-serif;
+    background-color: #075985;
+    color: white;
+    border: 2px solid #38bdf8;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#towerSelection button img, #towerSelectionRestart button img {
+    height: 60px; 
+    width: auto;
+}
+
+#towerSelection button:hover, #towerSelectionRestart button:hover {
+    background-color: #0369a1;
+    transform: scale(1.05);
+}
+
+#startScreen h1 {
+    font-size: 40px;
+    margin: 0 0 8px;
+    color: #38bdf8;
+    text-shadow: 0 0 12px #075985;
+}
+
+#startScreen p {
+    font-size: 20px;
+    margin: 0 0 8px;
+    color: #e0f2fe;
+}
+
 #gameOver {
     position: absolute;
     inset: 0;
@@ -61,6 +121,7 @@ body {
     color: white;
     font-family: Audiowide, sans-serif;
     z-index: 10;
+    gap: 12px;
 }
 
 #gameOver h1 {
@@ -71,6 +132,7 @@ body {
 #gameOver p {
     font-size: 26px;
     margin: 0 0 20px;
+    margin: 0 0 4px;
 }
 
 .hidden {
@@ -86,8 +148,10 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 5px;
+    margin-top: 8px;
 }
 
 #restartButton:hover {
     background-color: #075985;
+    background-color: #0369a1;
 }
